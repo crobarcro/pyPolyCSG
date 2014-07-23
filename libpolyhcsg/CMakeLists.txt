@@ -75,3 +75,6 @@ set_target_properties( polyhcsg PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY_DEBUG ..
   LIBRARY_OUTPUT_DIRECTORY_RELEASE ..
 )
+
+install(TARGETS polyhcsg LIBRARY DESTINATION lib)
+install (FILES ${BOOLEAN_HEADERS} DESTINATION include/polyhcsg)

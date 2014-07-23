@@ -50,3 +50,7 @@ set_target_properties( pyPolyCSG PROPERTIES
 
 #add_executable( pyPolyCSG_test source/boolean_test.cpp )
 #target_link_libraries( pyPolyCSG_test pyPolyCSG )
+
+install (TARGETS pyPolyCSG LIBRARY DESTINATION lib)
+install (FILES ${BOOLEAN_HEADERS} DESTINATION include/pyPolyCSG)
+
