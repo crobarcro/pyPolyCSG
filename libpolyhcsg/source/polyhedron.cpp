@@ -8,6 +8,8 @@
 #include"polyhedron_binary_op.h"
 #include"triangulate.h"
 
+namespace polyhcsg {
+
 polyhedron load_mesh_file( const char *filename ){
 	polyhedron p;
 	p.initialize_load_from_file( filename );
@@ -69,6 +71,18 @@ polyhedron::polyhedron( const polyhedron &in ){
 	m_coords = in.m_coords;
 	m_faces  = in.m_faces;
     m_faces_start = in.m_faces_start;
+}
+
+std::vector<double> polyhedron::getCoords() const {
+    return m_coords;
+}
+
+std::vector<int> polyhedron::getFaces() const {
+    return m_faces;
+}
+
+std::vector<int> polyhedron::getFaceStart() const {
+    return m_faces_start;
 }
 
 bool polyhedron::initialize_load_from_file( const char *filename ){
@@ -541,47 +555,6 @@ void polyhedron::get_face_vertices( int face_id, int *vertex_id_list ){
     }
 }
 
-boost::python::tuple polyhedron::py_get_vertex_coordinates( int vertex_id ){
-    if( vertex_id < 0 || vertex_id >= num_vertices() ){
-        throw std::range_error("invalid vertex id");
-    }
-    vertex_id *= 3;
-    return boost::python::make_tuple( m_coords[vertex_id], m_coords[vertex_id+1], m_coords[vertex_id+2] );
-}
-
-boost::python::list polyhedron::py_get_face_vertices( int face_id ){
-    if( face_id < 0 || face_id >= num_faces() ){
-        throw std::range_error("invalid face id");
-    }
-    int start = m_faces_start[face_id]+1;
-    int n = m_faces[ m_faces_start[face_id]];
-    boost::python::list ret;
-    for( int i=0; i<n; i++ ){
-        ret.append( m_faces[start+i] );
-    }
-    return ret;
-}
-
-boost::python::numeric::array polyhedron::py_get_vertices(){
-    boost::python::list tmp;
-    for( int i=0; i<num_vertices(); i++ ){
-        tmp.append( boost::python::make_tuple( m_coords[i*3+0], m_coords[i*3+1], m_coords[i*3+2] ) );
-    }
-    return boost::python::numeric::array( tmp );
-}
-
-boost::python::numeric::array polyhedron::py_get_triangles(){
-    polyhedron tri = triangulate();
-    boost::python::list tmp;
-    for( int i=0; i<tri.num_faces(); i++ ){
-        int vtx_id[3];
-        tri.get_face_vertices( i, vtx_id );
-        tmp.append( boost::python::make_tuple( vtx_id[0], vtx_id[1], vtx_id[2] ) );
-    }
-    return boost::python::numeric::array( tmp );
-}
-
-
 polyhedron polyhedron::translate( const double x, const double y, const double z ) const {
 	polyhedron_translate op( x, y, z );
 	return op( *this );
@@ -610,15 +583,6 @@ polyhedron polyhedron::mult_matrix_4(
     return op( *this );
 }
 
-polyhedron polyhedron::py_mult_matrix_4( const boost::python::list &m ) const {
-    double a[16];
-    if( boost::python::len(m) != 16 )
-        throw "expected 16 matrix coefficients";
-    for( int i=0; i<16; i++ ){
-        a[i] = boost::python::extract<double>( m[i] );
-    }
-    return mult_matrix_4( a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15] );
-}
 
 polyhedron polyhedron::mult_matrix_3(
         double xx,double xy,double xz,
@@ -629,16 +593,6 @@ polyhedron polyhedron::mult_matrix_3(
                                zx, zy, zz );
 
     return op( *this );
-}
-
-polyhedron polyhedron::py_mult_matrix_3( const boost::python::list &m ) const {
-    double a[9];
-    if( boost::python::len(m) != 9 )
-        throw "expected 9 matrix coefficients";
-    for( int i=0; i<9; i++ ){
-        a[i] = boost::python::extract<double>( m[i] );
-    }
-    return mult_matrix_3( a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8] );
 }
 
 
@@ -662,4 +616,4 @@ polyhedron polyhedron::operator*( const polyhedron &in ) const {
 	return op( *this, in );
 }
 
-
+} // namespace polyhcsg

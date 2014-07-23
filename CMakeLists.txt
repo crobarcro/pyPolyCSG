@@ -30,7 +30,7 @@ IF( PYTHONLIBS_FOUND AND Boost_FOUND )
   set( BOOLEAN_SOURCES ${BOOLEAN_SOURCES} source/python_wrapper.cpp )
 ENDIF( PYTHONLIBS_FOUND AND Boost_FOUND )
 
-include_directories( include ${INCLUDE_DIRS} )
+include_directories( include libpolyhcsg/include ${INCLUDE_DIRS} )
 add_library( pyPolyCSG SHARED ${BOOLEAN_SOURCES} ${BOOLEAN_HEADERS} )
 target_link_libraries( pyPolyCSG polyhcsg )
 IF( APPLE )

@@ -15,7 +15,7 @@
 /**
  @brief pypolyhedron class, thin wrapper for polyhedron class, wth python specific methods.
 */
-class pypolyhedron : public polyhedron {
+class pypolyhedron : public polyhcsg::polyhedron {
 
 public:
 	/**
@@ -24,9 +24,15 @@ public:
 	pypolyhedron();
 
 	/**
+	 @brief constructor from polyhedron object
+	*/
+	pypolyhedron( const polyhcsg::polyhedron &in );
+
+	/**
 	 @brief copy constructor, performs a deep copy of the data
 	*/
 	pypolyhedron( const pypolyhedron &in );
+
 
     /**
      @brief returns a tuple containing the vertex_id'th vertex's coordinates
@@ -53,6 +59,16 @@ public:
      @return numpy array of triangle vertex indices
     */
     boost::python::numeric::array py_get_triangles();
+
+    /**
+     @brief python version of mult_matrix_3 to get around boost::python argument count limits
+    */
+    pypolyhedron py_mult_matrix_3( const boost::python::list &m ) const;
+
+    /**
+     @brief python version of mult_matrix_4 to get around boost::pythoon argument count limits
+    */
+    pypolyhedron py_mult_matrix_4( const boost::python::list &m ) const;
 
 };
 

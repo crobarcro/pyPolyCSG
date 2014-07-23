@@ -57,6 +57,22 @@ pypolyhedron surface_of_revolution( const std::vector<double> &coords, const std
 
 // class methods
 
+pypolyhedron::pypolyhedron(){
+
+}
+
+pypolyhedron::pypolyhedron( const polyhcsg::polyhedron &in ) : polyhedron() {
+	m_coords = in.getCoords ();
+	m_faces  = in.getFaces ();
+    m_faces_start = in.getFaceStart();
+}
+
+pypolyhedron::pypolyhedron( const pypolyhedron &in ){
+	m_coords = in.m_coords;
+	m_faces  = in.m_faces;
+    m_faces_start = in.m_faces_start;
+}
+
 boost::python::tuple pypolyhedron::py_get_vertex_coordinates( int vertex_id ){
     if( vertex_id < 0 || vertex_id >= num_vertices() ){
         throw std::range_error("invalid vertex id");
@@ -95,4 +111,24 @@ boost::python::numeric::array pypolyhedron::py_get_triangles(){
         tmp.append( boost::python::make_tuple( vtx_id[0], vtx_id[1], vtx_id[2] ) );
     }
     return boost::python::numeric::array( tmp );
+}
+
+pypolyhedron pypolyhedron::py_mult_matrix_3( const boost::python::list &m ) const {
+    double a[9];
+    if( boost::python::len(m) != 9 )
+        throw "expected 9 matrix coefficients";
+    for( int i=0; i<9; i++ ){
+        a[i] = boost::python::extract<double>( m[i] );
+    }
+    return pypolyhedron (mult_matrix_3( a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8] ));
+}
+
+pypolyhedron pypolyhedron::py_mult_matrix_4( const boost::python::list &m ) const {
+    double a[16];
+    if( boost::python::len(m) != 16 )
+        throw "expected 16 matrix coefficients";
+    for( int i=0; i<16; i++ ){
+        a[i] = boost::python::extract<double>( m[i] );
+    }
+    return pypolyhedron (mult_matrix_4( a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14], a[15] ));
 }

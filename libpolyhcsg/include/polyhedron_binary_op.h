@@ -9,6 +9,8 @@
 
 #include"polyhedron.h"
 
+namespace polyhcsg {
+
 /**
  @brief Base class definining binary operations on polyhedra. These take a pair
  of polyhedral inputs and use them to compute a single polyhedral output
@@ -69,5 +71,6 @@ public:
 	polyhedron operator()( const polyhedron &A, const polyhedron &B );
 };
 
+} // namespace polyhcsg
 
 #endif

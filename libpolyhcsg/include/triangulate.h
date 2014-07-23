@@ -9,6 +9,8 @@
 
 #include<vector>
 
+namespace polyhcsg {
+
 /**
  @brief triangulates a simple polygon with no holes or self-intersections by ear-clipping
  @param[in]  coords  input array of coordinates, packed [x,y,x,y,x,y,...]
@@ -17,5 +19,7 @@
  @return true on success, false on failure
 */
 bool triangulate_simple_polygon( const std::vector<double> &coords, const int *contour, std::vector<int> &tris );
+
+}
 
 #endif

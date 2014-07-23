@@ -6,7 +6,7 @@
 #include"polyhedron_binary_op.h"
 
 #if defined(CSG_USE_CGAL) && !defined(CSG_USE_CARVE)
-#include <CGAL/Polyhedron_items_with_id_3.h> 
+#include <CGAL/Polyhedron_items_with_id_3.h>
 #include <CGAL/Exact_predicates_exact_constructions_kernel.h>
 #include<CGAL/Polyhedron_incremental_builder_3.h>
 #include<CGAL/Polyhedron_3.h>
@@ -22,6 +22,8 @@
 #include <carve/csg_triangulator.hpp>
 #include <carve/csg.hpp>
 #endif
+
+namespace polyhcsg {
 
 #if defined(CSG_USE_CGAL) && !defined(CSG_USE_CARVE)
 typedef CGAL::Exact_predicates_exact_constructions_kernel     Kernel;
@@ -41,23 +43,23 @@ public:
     void operator()( HDS& hds) {
         typedef typename HDS::Vertex   Vertex;
         typedef typename Vertex::Point Point;
-        
-        
+
+
         // create a cgal incremental builder
         CGAL::Polyhedron_incremental_builder_3<HDS> B( hds, true);
         B.begin_surface( t.num_vertices(), t.num_faces() );
-        
+
         // add the polyhedron vertices
         for( int i=0; i<t.num_vertices(); i++ ){
             double x, y, z;
             t.get_vertex( i, x, y, z );
             B.add_vertex( Point( x, y, z ) );
         }
-        
+
         std::vector<double> coords;
         std::vector<int> faces;
         t.output_store_in_mesh( coords, faces );
-        
+
         int nverts, tmpi = 0;
         while( tmpi < (int)faces.size() ){
             nverts = faces[tmpi++];
@@ -69,7 +71,7 @@ public:
             }
             B.end_facet();
         }
-        
+
         // finish up the surface
         B.end_surface();
     }
@@ -84,14 +86,14 @@ Nef_polyhedron polyhedron_to_cgal( const polyhedron &p ){
         return Nef_polyhedron( P );
     else
         std::cout << "input polyhedron is not closed!" << std::endl;
-    
+
     return Nef_polyhedron();
 }
 
 polyhedron cgal_to_polyhedron( const Nef_polyhedron &NP ){
     Polyhedron P;
     polyhedron ret;
-    
+
     if( NP.is_simple() ){
         NP.convert_to_polyhedron(P);
         std::vector<double> coords;
@@ -104,7 +106,7 @@ polyhedron cgal_to_polyhedron( const Nef_polyhedron &NP ){
             coords.push_back( CGAL::to_double( (*iter).point().z() ) );
             vid[ &(*iter) ] = next_id++;
         }
-        
+
         for( Polyhedron::Facet_iterator iter=P.facets_begin(); iter!=P.facets_end(); iter++ ){
             Polyhedron::Halfedge_around_facet_circulator j = iter->facet_begin();
             tris.push_back( CGAL::circulator_size(j) );
@@ -112,7 +114,7 @@ polyhedron cgal_to_polyhedron( const Nef_polyhedron &NP ){
                 tris.push_back( std::distance(P.vertices_begin(), j->vertex()) );
             } while ( ++j != iter->facet_begin());
         }
-        
+
         ret.initialize_load_from_mesh( coords, tris );
     } else {
         std::cout << "resulting polyhedron is not simple!" << std::endl;
@@ -174,9 +176,9 @@ polyhedron polyhedron_intersection::operator()( const polyhedron &A, const polyh
 carve::mesh::MeshSet<3> *polyhedron_to_carve( const polyhedron &p ){
 	std::vector<double> coords;
 	std::vector<int> faces;
-    
+
 	p.output_store_in_mesh( coords, faces );
-	
+
     std::vector<carve::mesh::MeshSet<3>::vertex_t*> v;
     std::vector<carve::mesh::MeshSet<3>::face_t *> f;
     for( int i=0; i<(int)coords.size(); i+=3 ){
@@ -200,11 +202,11 @@ polyhedron carve_to_polyhedron( carve::mesh::MeshSet<3> *p ){
 	std::map< const carve::mesh::MeshSet<3>::vertex_t*, int > vid;
 	std::vector<double> coords;
 	std::vector<int> faces;
-    
+
     int nextvid = 0;
     for( carve::mesh::MeshSet<3>::face_iter i=p->faceBegin(); i!=p->faceEnd(); ++i ){
         carve::mesh::MeshSet<3>::face_t *f = *i;
-        
+
         std::vector<int> fvid;
         for (carve::mesh::MeshSet<3>::face_t::edge_iter_t e = f->begin(); e != f->end(); ++e) {
             carve::mesh::MeshSet<3>::vertex_t *tv = e->vert;
@@ -221,13 +223,13 @@ polyhedron carve_to_polyhedron( carve::mesh::MeshSet<3> *p ){
             faces.push_back( fvid[j] );
         }
     }
-    
+
 	polyhedron poly;
 	poly.initialize_load_from_mesh( coords, faces );
 	return poly;
 }
 
-polyhedron polyhedron_union::operator()( const polyhedron &A, const polyhedron &B ){	
+polyhedron polyhedron_union::operator()( const polyhedron &A, const polyhedron &B ){
 	carve::mesh::MeshSet<3> *pA = polyhedron_to_carve( A );
 	carve::mesh::MeshSet<3> *pB = polyhedron_to_carve( B );
 	carve::csg::CSG csg;
@@ -272,8 +274,8 @@ polyhedron polyhedron_intersection::operator()( const polyhedron &A, const polyh
 	delete pA;
 	delete pB;
 	delete pR;
-	return R;	
+	return R;
 }
 #endif
 
-
+} // namespace polyhcsg

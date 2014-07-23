@@ -5,6 +5,7 @@
 #include<algorithm>
 #include<iterator>
 #include<string>
+#include<cstring>
 #include<cmath>
 #include<cstdlib>
 #include<map>
@@ -29,6 +30,9 @@
 #include"mesh_io.h"
 #include"polyhedron.h"
 
+using std::strcmp;
+
+namespace polyhcsg {
 
 // forward declarations of loading functions, these must be added to the load_mesh_file() function
 // cases in order to be used
@@ -71,7 +75,7 @@ const char *mesh_io_get_file_extension( const char *in ){
 bool load_mesh_file( const char *filename, std::vector<double> &coords, std::vector<int> &faces ){
 	// get the file extension
 	const char *ext = mesh_io_get_file_extension( filename );
-	
+
 	// check the possible extensions
 	if( strcmp( ext, "off") == 0 ){
 		// call *.off loader
@@ -103,7 +107,7 @@ bool load_mesh_file( const char *filename, std::vector<double> &coords, std::vec
 bool save_mesh_file( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
 	// get the file extension
 	const char *ext = mesh_io_get_file_extension( filename );
-	    
+
 	// check the possible extensions
 	if( strcmp(ext, "off") == 0 ){
 		// call *.off saver
@@ -127,33 +131,33 @@ bool save_mesh_file( const std::vector<double> &coords, const std::vector<int> &
 		// call the VRML saver
 		return save_mesh_file_wrl( coords, faces, filename );
 	}
-	
+
 	// if one of the savers did not succeed, return failure
 	return false;
 }
-	
+
 bool load_mesh_file_off( const char *filename, std::vector<double> &coords, std::vector<int> &faces ){
 	int nverts, nfaces, sid, tmpi;
 	double x, y, z;
 	std::string token;
-	
+
 	// open the input file for reading
 	std::ifstream input( filename );
-	
+
 	// check that the stream opened successfully
 	if( input.fail() )
 		return false;
-	
+
 	// compute the starting vertex index
 	sid = (int)coords.size()/3;
-	
+
 	// read the header, number of vertices, faces and edges
 	input >> token >> nverts >> nfaces >> tmpi;
-	
+
 	// check that the file is an OFF file
 	if( token != std::string("OFF") )
 		return false;
-	
+
 	// now read the vertices
 	for( int i=0; i<nverts; i++ ){
 		input >> x >> y >> z;
@@ -161,13 +165,13 @@ bool load_mesh_file_off( const char *filename, std::vector<double> &coords, std:
 		coords.push_back( y );
 		coords.push_back( z );
 	}
-	
+
 	// now read the faces
 	for( int i=0; i<nfaces; i++ ){
 		// read the number of face vertices
 		input >> nverts;
 		faces.push_back( nverts );
-		
+
 		for( int j=0; j<nverts; j++ ){
 			// add the vertex to the face, offseting by
 			// the number of vertices initially in the coords array
@@ -175,10 +179,10 @@ bool load_mesh_file_off( const char *filename, std::vector<double> &coords, std:
 			faces.push_back( tmpi+sid );
 		}
 	}
-	
+
 	// close the input file
 	input.close();
-	
+
 	return true;
 }
 
@@ -186,17 +190,17 @@ bool load_mesh_file_obj( const char *filename, std::vector<double> &coords, std:
 	int sid, tmpi;
 	double x, y, z;
 	std::string line, token;
-	
+
 	// open the input file for reading
 	std::ifstream input( filename );
-	
+
 	// check that the stream opened successfully
 	if( input.fail() )
 		return false;
 
 	// get the starting vertex id
 	sid = (int)coords.size()/3;
-	
+
 	// loop over the file line by line
 	while( !(getline(input,line)).fail() ){
 		if( line[0] == 'v'  && isspace(line[1]) ){
@@ -210,9 +214,9 @@ bool load_mesh_file_obj( const char *filename, std::vector<double> &coords, std:
 			// load a face
 			std::vector<int> vid;
 			std::istringstream iss( line );
-			iss >> token; // grab the 'f' 
+			iss >> token; // grab the 'f'
 			while( iss >> token ){
-				// have to do this stuff because the vertices may have texture 
+				// have to do this stuff because the vertices may have texture
 				// coordinates and normals included
 				std::replace( token.begin(), token.end(), '/', ' ' );
 				std::istringstream iss2( token );
@@ -225,10 +229,10 @@ bool load_mesh_file_obj( const char *filename, std::vector<double> &coords, std:
 			}
 		}
 	}
-	
+
 	// close the input file
 	input.close();
-	
+
 	return true;
 }
 
@@ -244,7 +248,7 @@ bool load_mesh_file_vtp( const char *filename, std::vector<double> &coords, std:
 	reader->SetFileName( filename );
 	reader->Update();
 	vtkSmartPointer<vtkPolyData> polydata = reader->GetOutput();
-	
+
 	// load the datasets points
 	int npoints = (int)polydata->GetNumberOfPoints();
 	for( int i=0; i<npoints; i++ ){
@@ -265,9 +269,9 @@ bool load_mesh_file_vtp( const char *filename, std::vector<double> &coords, std:
 			faces.push_back( pnt_id[i] );
 		}
 	}
-	
+
 	// TODO: add strip loading
-	
+
 	return true;
 #else
 	std::cout << "Error: Loading from vtkPolyData inputs (*.vtp) disabled, enable by recompiling psCSG with CSG_USE_VTK defined" << std::endl;
@@ -282,7 +286,7 @@ bool load_mesh_file_vtu( const char *filename, std::vector<double> &coords, std:
 	reader->SetFileName( filename );
 	reader->Update();
 	vtkSmartPointer<vtkUnstructuredGrid> grid = reader->GetOutput();
-	
+
 	for( int i=0; i<grid->GetNumberOfCells(); i++ ){
 		vtkCell *c = grid->GetCell(i);
 		switch( c->GetCellType() ){
@@ -309,7 +313,7 @@ bool load_mesh_file_vtu( const char *filename, std::vector<double> &coords, std:
 				break;
 		}
 	}
-	
+
 	// renumber all the vertices so that only vertices on surface
 	// faces remain
 	int next_id = 0;
@@ -331,7 +335,7 @@ bool load_mesh_file_vtu( const char *filename, std::vector<double> &coords, std:
 				coords.push_back( xyz[0] );
 				coords.push_back( xyz[1] );
 				coords.push_back( xyz[2] );
-				
+
 				// then add them to the renumbering list
 				vid_map[vid] = next_id++;
 			}
@@ -339,7 +343,7 @@ bool load_mesh_file_vtu( const char *filename, std::vector<double> &coords, std:
 			tmpi++;
 		}
 	}
-	
+
 	return true;
 #else
 	std::cout << "Error: Loading from vtkUnstructuredGrid inputs (*.vtu) disabled, enable by recompiling psCSG with CSG_USE_VTK defined" << std::endl;
@@ -362,12 +366,12 @@ bool load_mesh_file_wrl( const char *filename, std::vector<double> &coords, std:
 
 bool save_mesh_file_off( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
 	int nverts, nfaces, tmpi;
-	
+
 	// open the output file and check for success
 	std::ofstream output(filename);
 	if( output.fail() )
 		return false;
-	
+
 	// compute the number of vertices and faces
 	nverts = (int)coords.size()/3;
 	nfaces = tmpi = 0;
@@ -375,16 +379,16 @@ bool save_mesh_file_off( const std::vector<double> &coords, const std::vector<in
 		tmpi += 1+faces[tmpi];
 		nfaces++;
 	}
-	
+
 	// write out the header
 	output << "OFF" << std::endl;
 	output << nverts << " " << nfaces << " " << 0 << std::endl;
-	
+
 	// write out the vertices
 	for( int i=0; i<(int)coords.size(); i+=3 ){
 		output << coords[i+0] << " " << coords[i+1] << " " << coords[i+2] << std::endl;
 	}
-	
+
 	// write out the faces
 	tmpi = 0;
 	while( tmpi < (int)faces.size() ){
@@ -395,21 +399,21 @@ bool save_mesh_file_off( const std::vector<double> &coords, const std::vector<in
 		}
 		output << std::endl;
 	}
-	
+
 	// close the output file
 	output.close();
-	
+
 	return true;
 }
 
 bool save_mesh_file_obj( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
 	int nverts, tmpi;
-	
+
 	// open the output file and check for success
 	std::ofstream output(filename);
 	if( output.fail() )
 		return false;
-	
+
 	// compute the number of vertices and faces
 	for( int i=0; i<(int)coords.size(); i+=3 ){
 		output << "v " << coords[i+0] << " " << coords[i+1] << " " << coords[i+2] << std::endl;
@@ -423,29 +427,29 @@ bool save_mesh_file_obj( const std::vector<double> &coords, const std::vector<in
 		}
 		output << std::endl;
 	}
-	
+
 	output.close();
-	
+
 	return true;
 }
 
 // computes the normal of a triangle defined by points 'a', 'b', and 'c', storing the result in 'n'
 bool mesh_io_compute_normal( const double *a, const double *b, const double *c, double *n ){
 	double len;
-	
+
 	// compute normal vector
 	double u[] = { b[0]-a[0], b[1]-a[1], b[2]-a[2] };
 	double v[] = { c[0]-a[0], c[1]-a[1], c[2]-a[2] };
 	n[0] = u[1]*v[2] - u[2]*v[1];
 	n[1] = u[2]*v[0] - u[0]*v[2];
 	n[2] = u[0]*v[1] - u[1]*v[0];
-	
+
 	// compute vector length, return false if it is
 	// too small, which indicates a degenerate edge
 	len = sqrt( n[0]*n[0] + n[1]*n[1] + n[2]*n[2] );
 	if( len < 1e-10 )
 		return false;
-	
+
 	// otherwise return true
 	return true;
 }
@@ -453,7 +457,7 @@ bool mesh_io_compute_normal( const double *a, const double *b, const double *c, 
 // save a mesh file as STL format
 // TODO: handle endianess
 bool save_mesh_file_stl( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
-	
+
 	// STL only supports triangular faces, but the CSG operations performed
 	// using the Carve backend can produce arbitrary simple polygons.  To
 	// handle this, create a polyhedron from the input mesh, triangulate it
@@ -461,13 +465,13 @@ bool save_mesh_file_stl( const std::vector<double> &coords, const std::vector<in
 	polyhedron tmp;
 	tmp.initialize_load_from_mesh( coords, faces );
 	tmp = tmp.triangulate();
-	
+
 	std::vector<double> tcoords;
 	std::vector<int> tfaces;
 	tmp.output_store_in_mesh( tcoords, tfaces );
-	
+
 	int tmpi, nfaces;
-	
+
 	// check for non-triangular faces and count the total number of faces
 	nfaces = tmpi = 0;
 	while( tmpi < (int)tfaces.size() ){
@@ -478,29 +482,29 @@ bool save_mesh_file_stl( const std::vector<double> &coords, const std::vector<in
 		tmpi += 1+tfaces[tmpi];
 		nfaces++;
 	}
-	
+
 	// open the output stream
 	std::ofstream output( filename, std::ios_base::binary );
 	if( output.fail() ){
 		return false;
 	}
-	
+
 	// write the file header (all zeros)
 	char header[80];
 	memset( header, 0, 80 );
 	output.write( header, 80 );
 	output.write( (const char*)&nfaces, sizeof(int) );
-	
+
 	// write the triangles (all faces are triangles)
 	for( int i=0; i<(int)tfaces.size(); i+=4 ){
 		double dnorm[3];
 		int v0 = 3*tfaces[i+1], v1 = 3*tfaces[i+2], v2 = 3*tfaces[i+3];
-		
+
 		// compute and write the normal to the output
 		mesh_io_compute_normal( &tcoords[v0], &tcoords[v1], &tcoords[v2], dnorm );
 		float xyz[] = { (float)dnorm[0], (float)dnorm[1], (float)dnorm[2] };
 		output.write( (const char*)&xyz[0], 3*sizeof(float) );
-		
+
 		// write the first vertex of the triangle to the output
 		xyz[0] = (float)tcoords[v0+0]; xyz[1] = (float)tcoords[v0+1]; xyz[2] = (float)tcoords[v0+2];
 		output.write( (const char*)&xyz[0], 3*sizeof(float) );
@@ -508,19 +512,19 @@ bool save_mesh_file_stl( const std::vector<double> &coords, const std::vector<in
 		// write the first vertex of the triangle to the output
 		xyz[0] = (float)coords[v1+0]; xyz[1] = (float)coords[v1+1]; xyz[2] = (float)tcoords[v1+2];
 		output.write( (const char*)&xyz[0], 3*sizeof(float) );
-		
+
 		// write the first vertex of the triangle to the output
 		xyz[0] = (float)tcoords[v2+0]; xyz[1] = (float)tcoords[v2+1]; xyz[2] = (float)tcoords[v2+2];
 		output.write( (const char*)&xyz[0], 3*sizeof(float) );
-		
+
 		// write the 16 bit flag at the end of the triangle
 		unsigned short stmp = 0;
 		output.write( (const char*)&stmp, sizeof(unsigned short) );
 	}
-	
+
 	// close the output file
 	output.close();
-	
+
 	return true;
 }
 
@@ -531,12 +535,12 @@ bool save_mesh_file_vtp( const std::vector<double> &coords, const std::vector<in
 	vtkSmartPointer<vtkPolyData>   polydata = vtkSmartPointer<vtkPolyData>::New();
 	vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
 
-	
+
 	// create the coordinate array
 	for( int i=0; i<(int)coords.size(); i+=3 ){
 		points->InsertNextPoint( coords[i], coords[i+1], coords[i+2] );
 	}
-	
+
 	// create the cell array
 	int tmpi = 0;
 	while( tmpi < (int)faces.size() ){
@@ -553,12 +557,12 @@ bool save_mesh_file_vtp( const std::vector<double> &coords, const std::vector<in
 	writer->SetInput( polydata );
 	writer->SetFileName( filename );
 	writer->Write();
-	
+
 	return true;
 #else
 	std::cout << "Error: Saving to vtkPolyData outputs (*.vtp) disabled, enable by recompiling psCSG with CSG_USE_VTK defined" << std::endl;
 	return false;
-#endif	
+#endif
 }
 
 bool save_mesh_file_vtu( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
@@ -566,12 +570,12 @@ bool save_mesh_file_vtu( const std::vector<double> &coords, const std::vector<in
 	vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
 	vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 	vtkSmartPointer<vtkUnstructuredGrid> grid = vtkSmartPointer<vtkUnstructuredGrid>::New();
-	
+
 	// add the points to the grid
 	for( int i=0; i<(int)coords.size(); i+=3 ){
 		points->InsertNextPoint( &coords[i] );
 	}
-	
+
 	int tmpi = 0;
 	while( tmpi < (int)faces.size() ){
 		int nverts = faces[tmpi++];
@@ -591,17 +595,17 @@ bool save_mesh_file_vtu( const std::vector<double> &coords, const std::vector<in
 				break;
 		}
 	}
-	
+
 	grid->SetPoints( points );
 	writer->SetFileName( filename );
 	writer->SetInput( grid );
 	writer->Write();
-	
+
 	return true;
 #else
 	std::cout << "Error: Saving to vtkUnstructuredGrid outputs (*.vtu) disabled, enable by recompiling psCSG with CSG_USE_VTK defined" << std::endl;
 	return false;
-#endif	
+#endif
 }
 
 bool save_mesh_file_ply( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename ){
@@ -616,4 +620,6 @@ bool save_mesh_file_wrl( const std::vector<double> &coords, const std::vector<in
 	return false;
 }
 
+
+} // namespace polyhcsg
 

@@ -9,6 +9,8 @@
 
 #include<vector>
 
+namespace polyhcsg {
+
 /**
  @brief Loads a mesh into the packed array data format used by the code
  @param[in] filename name of file to load
@@ -19,12 +21,14 @@
 bool load_mesh_file( const char *filename, std::vector<double> &coords, std::vector<int> &faces );
 
 /**
- @brief Saves a mesh in the packed array data format to a file. The 
+ @brief Saves a mesh in the packed array data format to a file. The
  @param[in] filename name of file to load
  @param[in] coords vector of packed coordinates [x,y,z,x,y,z,...]
  @param[in] faces vector of packed face indices [nverts_A,A0,A1,A2,...,nverts_B,B0,B1,B2,B3,...]
  @return true if load was successful, false otherwise
 */
 bool save_mesh_file( const std::vector<double> &coords, const std::vector<int> &faces, const char *filename );
+
+} // namespace polyhcsg
 
 #endif

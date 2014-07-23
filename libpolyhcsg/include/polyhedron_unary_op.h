@@ -4,10 +4,12 @@
 /**
  @file polyhedron_unary_op.h
  @author James Gregson (james.gregson@gmail.com)
- @brief Defines a base class for unary operations on polyhedra that produce polyhedra as output.  A set of affine transformations are then implemented using this base to provide the facility to translate, rotate and scale polyhedra.  
+ @brief Defines a base class for unary operations on polyhedra that produce polyhedra as output.  A set of affine transformations are then implemented using this base to provide the facility to translate, rotate and scale polyhedra.
 */
 
 #include"polyhedron.h"
+
+namespace polyhcsg {
 
 /**
  @brief Base class definining unary operations on polyhedra. Produces
@@ -39,7 +41,7 @@ public:
 	 @param[in] z distance to move polyhedron along z-axis
 	*/
 	polyhedron_translate( const double x, const double y, const double z );
-	
+
 	/**
 	 @brief applies the translation operation
 	 @param[in] in input polhedron
@@ -63,7 +65,7 @@ public:
 	 @param[in] z distance to move polyhedron along z-axis
 	 */
 	polyhedron_rotate( const double theta_x, const double theta_y, const double theta_z );
-	
+
 	/**
 	 @brief applies the translation operation
 	 @param[in] in input polhedron
@@ -87,7 +89,7 @@ public:
 	 @param[in] z distance to move polyhedron along z-axis
 	 */
 	polyhedron_scale( const double x, const double y, const double z );
-	
+
 	/**
 	 @brief applies the translation operation
 	 @param[in] in input polhedron
@@ -141,5 +143,7 @@ class polyhedron_multmatrix4 : public polyhedron_unary_op
          */
         polyhedron operator()( const polyhedron &in );
 };
+
+} // namespace polyhcsg
 
 #endif

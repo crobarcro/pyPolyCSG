@@ -3,6 +3,8 @@
 
 #include<vector>
 
+namespace polyhcsg {
+
 /**
  @brief determines if the input mesh is a closed manifold
  @param[in] coords input coordinate array, packed [x,y,z,x,y,z,...]
@@ -20,5 +22,7 @@ bool mesh_is_closed_manifold( const std::vector<double> &coords, const std::vect
  @return true if the normal was successfully estimated, false otherwise
 */
 bool mesh_estimate_facet_normal( const std::vector<double> &coords, const int *face_vtx, double *normal, double *D=NULL );
+
+} // namespace polyhcsg
 
 #endif

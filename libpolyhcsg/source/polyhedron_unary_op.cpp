@@ -2,6 +2,8 @@
 #include<vector>
 #include"polyhedron_unary_op.h"
 
+namespace polyhcsg {
+
 polyhedron_translate::polyhedron_translate( const double x, const double y, const double z ){
 	m_xyz[0]=x; m_xyz[1]=y; m_xyz[2]=z;
 }
@@ -35,19 +37,19 @@ polyhedron_rotate::polyhedron_rotate( double theta_x, double theta_y, double the
 	Rx[0][0]=1.0; Rx[0][1]=0.0; Rx[0][2]=0.0;
 	Rx[1][0]=0.0; Rx[1][1]=c;   Rx[1][2]=-s;
 	Rx[2][0]=0.0; Rx[2][1]=s;   Rx[2][2]=c;
-	
+
 	c = cos( theta_y*M_PI/180.0 );
 	s = sin( theta_y*M_PI/180.0 );
 	Ry[0][0]=c;   Ry[0][1]=0.0; Ry[0][2]=s;
 	Ry[1][0]=0.0; Ry[1][1]=1.0; Ry[1][2]=0.0;
 	Ry[2][0]=-s;  Ry[2][1]=0.0; Ry[2][2]=c;
-	
+
 	c = cos( theta_z*M_PI/180.0 );
 	s = sin( theta_z*M_PI/180.0 );
 	Rz[0][0]=c;   Rz[0][1]=-s;  Rz[0][2]=0.0;
 	Rz[1][0]=s;   Rz[1][1]=c;   Rz[1][2]=0.0;
 	Rz[2][0]=0.0; Rz[2][1]=0.0; Rz[2][2]=1.0;
-	
+
 	unary_op_matrix_mult( Rx, Ry, m_A );
 	unary_op_matrix_mult( m_A, Rz, Rx );
 	for( int i=0; i<3; i++ ){
@@ -146,3 +148,5 @@ polyhedron polyhedron_multmatrix4::operator()( const polyhedron &in ) {
   ret = (*translate)(ret);
 	return ret;
 }
+
+} // namespace polyhcsg
