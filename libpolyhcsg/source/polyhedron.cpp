@@ -541,7 +541,7 @@ int polyhedron::num_face_vertices( int face_id ){
     if( face_id < 0 || face_id >= num_faces() ){
         throw std::range_error("invalid face id");
     }
-    return m_faces_start[face_id];
+    return m_faces[m_faces_start[face_id]];
 }
 
 void polyhedron::get_face_vertices( int face_id, int *vertex_id_list ){
