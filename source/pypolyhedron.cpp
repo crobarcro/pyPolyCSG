@@ -64,7 +64,7 @@ pypolyhedron::pypolyhedron(){
 pypolyhedron::pypolyhedron( const polyhcsg::polyhedron &in ) : polyhedron() {
 	m_coords = in.getCoords ();
 	m_faces  = in.getFaces ();
-    m_faces_start = in.getFaceStart();
+    m_faces_start = in.getFacesStart();
 }
 
 pypolyhedron::pypolyhedron( const pypolyhedron &in ){

@@ -34,6 +34,11 @@ public:
 	polyhedron( const polyhedron &in );
 
     /**
+     @brief copy costurctor, deep copy from pointer
+    */
+    polyhedron( const polyhedron * in );
+
+    /**
      @brief returns the number of vertices in the mesh
     */
     int num_vertices();
@@ -49,7 +54,7 @@ public:
 
     std::vector<double> getCoords() const;
     std::vector<int> getFaces() const;
-    std::vector<int> getFaceStart() const;
+    std::vector<int> getFacesStart() const;
 
     /**
      @brief returns the number of faces in the mesh
@@ -208,8 +213,8 @@ public:
      @brief apply a 3x3 rotation matrix to the polyhedron
      */
     polyhedron mult_matrix_3( double xx,double xy,double xz,
-                                      double yx,double yy,double yz,
-                                      double zx,double zy,double zz ) const;
+                              double yx,double yy,double yz,
+                              double zx,double zy,double zz ) const;
 
 
 

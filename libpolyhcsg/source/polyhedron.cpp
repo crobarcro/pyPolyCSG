@@ -73,6 +73,12 @@ polyhedron::polyhedron( const polyhedron &in ){
     m_faces_start = in.m_faces_start;
 }
 
+polyhedron::polyhedron( const polyhedron* in ){
+	m_coords = in->getCoords ();
+	m_faces  = in->getFaces ();
+    m_faces_start = in->getFacesStart ();
+}
+
 std::vector<double> polyhedron::getCoords() const {
     return m_coords;
 }
@@ -81,7 +87,7 @@ std::vector<int> polyhedron::getFaces() const {
     return m_faces;
 }
 
-std::vector<int> polyhedron::getFaceStart() const {
+std::vector<int> polyhedron::getFacesStart() const {
     return m_faces_start;
 }
 
@@ -104,12 +110,13 @@ bool polyhedron::initialize_load_from_mesh( const std::vector<double> &coords, c
 	// for now, just copy the arrays over
 	m_coords = coords;
 	m_faces  = faces;
-
+    
     // build the face_start array, which
     // gives the starting index of each face
     // (to the entry containing the number of
     // vertices in the face).
     int i=0;
+    m_faces_start.clear ();
     while( i < m_faces.size() ){
         m_faces_start.push_back( i );
         i += m_faces[i]+1;
