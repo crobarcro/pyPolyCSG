@@ -110,7 +110,7 @@ bool polyhedron::initialize_load_from_mesh( const std::vector<double> &coords, c
 	// for now, just copy the arrays over
 	m_coords = coords;
 	m_faces  = faces;
-    
+
     // build the face_start array, which
     // gives the starting index of each face
     // (to the entry containing the number of
@@ -410,57 +410,116 @@ bool polyhedron::initialize_create_surface_of_revolution( const std::vector<doub
 	std::vector<double> tcoords;
 	std::vector<int>    tfaces;
 
-	int jtop = segments+1;
+	int lastseg = segments+1;
 	if( fabs(angle-360.0) < 1e-5 ){
-		jtop = segments;
+	    // below this tolerance the surface will be a closed loop
+	    // so the last segment will actually be the first segment
+		lastseg = segments;
 	}
 
 	int next_id = 0;
-	double dtheta = angle*M_PI/(double(segments)*180.0);
+
+    // rotation angle between each rotated section
+	double dtheta = angle*M_PI / (double(segments)*180.0);
+
+	// ****          Here we build up the coordinates         ***** //
+
+	// map of pairs of vertex ids making up the edges of the polyhedron
+	// there will be one edge for every segment and line, i.e. a total
+	// of segments * lines.size() edges
 	std::map< ii_pair, int > vid_map;
-	for( int j=0; j<segments+1; j++ ){
-		double c = cos(j*dtheta);
-		double s = sin(j*dtheta);
-		for( int i=0; i<(int)lines.size(); i++ ){
-			if( fabs(coords[ lines[i]*2+1 ]) < 1e-6 ){
-				if( j == 0 ){
-					tcoords.push_back( coords[lines[i]*2+0] );
-					tcoords.push_back( c*coords[lines[i]*2+1] );
-					tcoords.push_back( s*coords[lines[i]*2+1] );
-					vid_map[ ii_pair(j,i) ] = next_id++;
-				} else {
-					vid_map[ ii_pair(j,i) ] = vid_map[ ii_pair(j-1,i) ];
+	for( int segn=0; segn < lastseg; segn++ )
+	{
+        // loop through each incremental rotation
+		double c = cos(segn*dtheta);
+		double s = sin(segn*dtheta);
+
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+		    // loop through each line making up the shape to be rotated
+
+		    // Test if the y coordinate of the second point making up the
+		    // current line is zero to within a tolerance
+			if( fabs(coords[ lines[linen]*2+1 ]) < 1e-6 )
+			{
+				if( segn == 0 )
+				{
+                    // This is the first segment so we allow the coordinate to
+                    // be added, for other segments we will link back to this
+                    // coordinate
+					tcoords.push_back( coords[lines[linen]*2+0] ); // x-coord stays the same
+					tcoords.push_back( c * coords[lines[linen]*2+1] ); // y-coord modified
+					tcoords.push_back( s * coords[lines[linen]*2+1] ); // z-coord calculated
+					// add the edge to the edge list
+					vid_map[ ii_pair(segn,linen) ] = next_id++;
 				}
-			} else {
-				tcoords.push_back( coords[lines[i]*2+0] );
-				tcoords.push_back( c*coords[lines[i]*2+1] );
-				tcoords.push_back( s*coords[lines[i]*2+1] );
-				vid_map[ ii_pair(j,i) ] = next_id++;
+				else
+				{
+                    // this is not the first segment, so instead we point to
+                    // the location where this coordinate was first added, and
+                    // don't add a new coordinate
+					vid_map[ ii_pair(segn,linen) ] = vid_map[ ii_pair(segn-1,linen) ];
+				}
+			}
+			else
+			{
+                // normal coordinate, not lying on y-axis
+				tcoords.push_back( coords[lines[linen]*2+0] ); // x-coord stays the same
+				tcoords.push_back( c*coords[lines[linen]*2+1] ); // y-coord modified
+				tcoords.push_back( s*coords[lines[linen]*2+1] ); // z-coord calculated
+				// add the edge to the edge list
+				vid_map[ ii_pair(segn,linen) ] = next_id++;
 			}
  		}
 	}
 
-	for( int j=0; j<segments; j++ ){
-		for( int i=0; i<(int)lines.size(); i++ ){
-			int v0 = vid_map[ii_pair((j+0)%jtop,i+0)];
-			int v1 = vid_map[ii_pair((j+1)%jtop,i+0)];
-			int v2 = vid_map[ii_pair((j+0)%jtop,(i+1)%lines.size())];
-			int v3 = vid_map[ii_pair((j+1)%jtop,(i+1)%lines.size())];
-			if( v0 == v1 && v2 == v3 ){
+    // If the angle is a full revolution, we must point to the first segment in
+    // the vid map so the last set of faces is created, completing the surface
+	if( lastseg == segments )
+	{
+        for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+            vid_map[ ii_pair(lastseg,linen) ] = vid_map[ ii_pair(0,linen) ];
+        }
+	}
+
+    // ****            Here we generate the faces            ***** //
+	for( int segn=0; segn<segments; segn++ )
+	{
+	    // loop through each incremental rotation
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+		    // get index of the first vertex of the line from this segment
+			int v0 = vid_map[ ii_pair((segn+0) % lastseg, linen+0) ];
+			// get index of the first vertex of the line from the next segment
+			int v1 = vid_map[ ii_pair((segn+1) % lastseg, linen+0) ];
+			// get index of the second vertex of the same line from this segment
+			int v2 = vid_map[ ii_pair((segn+0) % lastseg, (linen+1) % lines.size()) ];
+			// get index of the second vertex of the line from the next segment
+			int v3 = vid_map[ ii_pair((segn+1) % lastseg, (linen+1) % lines.size()) ];
+
+			if( v0 == v1 && v2 == v3 )
+			{
 				// do nothing, line-segment lies along axis, region contains no volume
-			} else if( v0 == v1 ){
+			}
+			else if( v0 == v1 )
+			{
 				// first point on axis, second off axis, triangular face
 				tfaces.push_back( 3 );
 				tfaces.push_back( v3 );
 				tfaces.push_back( v2 );
 				tfaces.push_back( v0 );
-			} else if( v2 == v3 ){
+			}
+			else if( v2 == v3 )
+			{
 				// first point off axis, second point on, triangular face
 				tfaces.push_back( 3 );
 				tfaces.push_back( v0 );
 				tfaces.push_back( v1 );
 				tfaces.push_back( v2 );
-			} else {
+			}
+			else
+			{
 				// both points off axis, quad face
 				tfaces.push_back( 4 );
 				tfaces.push_back( v1 );
@@ -470,15 +529,19 @@ bool polyhedron::initialize_create_surface_of_revolution( const std::vector<doub
 			}
 		}
 	}
+
 	// if the angle is not a full revolution, add caps for the exposed sections
-	if( jtop != segments ){
+	if( lastseg != segments )
+	{
 		tfaces.push_back( lines.size() );
-		for( int i=0; i<(int)lines.size(); i++ ){
-			tfaces.push_back( vid_map[ ii_pair(0,i) ] );
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+			tfaces.push_back( vid_map[ ii_pair(0,linen) ] );
 		}
 		tfaces.push_back( lines.size() );
-		for( int i=0; i<(int)lines.size(); i++ ){
-			tfaces.push_back( vid_map[ ii_pair(segments,lines.size()-i-1) ] );
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+			tfaces.push_back( vid_map[ ii_pair(segments,lines.size()-linen-1) ] );
 		}
 	}
 
