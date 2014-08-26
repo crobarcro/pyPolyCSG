@@ -52,8 +52,19 @@ public:
         z = m_coords[id*3+2];
     }
 
+    /**
+     @brief return the vertex coordinates vector
+    */
     std::vector<double> getCoords() const;
+
+     /**
+     @brief return the vertex id vector for the faces
+    */
     std::vector<int> getFaces() const;
+
+    /**
+     @brief return the vector containing the starting point of each face in the faces vector
+    */
     std::vector<int> getFacesStart() const;
 
     /**
