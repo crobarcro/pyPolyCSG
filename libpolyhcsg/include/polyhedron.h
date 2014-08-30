@@ -161,6 +161,17 @@ public:
 	*/
 	bool initialize_create_extrusion( const std::vector<double> &coords, const std::vector<int> &lines, const double distance );
 
+    /**
+	 @brief extrudes a profile, (defined in the x-y plane), in the z direction with rotation
+	 @param[in] coords coordinates of the profile vertices, packed as [x,y,x,y,...,x,y]
+	 @param[in] lines packed array of point indices making up the profile line-segments, [A,B,...]
+	 @param[in] distance total distance to extrude the profile
+     @param[in] segments number of segments in the rotation
+     @param[in] rotangle rotation angle around z-axis to be applied to each segment
+	 @return true on success, false otherwise
+	*/
+	bool initialize_create_extrusion( const std::vector<double> &coords, const std::vector<int> &lines, const double distance, const int segments, const double dtheta );
+    
 	/**
 	 @brief generates a surface of revolution (SOR )from the input 2D profile by revolving a contour around the x-axis
 	 @param[in] coords coordinates of the profile vertices, as in initialize_create_extrude()
@@ -180,7 +191,7 @@ public:
 	bool output_store_in_mesh( std::vector<double> &coords, std::vector<int> &faces ) const;
 
 	/**
-	 @brief writes the polyhedron to a file.  The output type is automaticallydetermined by the file extension, for which there must be a writer
+	 @brief writes the polyhedron to a file.  The output type is automatically determined by the file extension, for which there must be a writer
 	 @param[in] filename output filename where the mesh should be written
 	 @return true on success, false otherwise
 	*/

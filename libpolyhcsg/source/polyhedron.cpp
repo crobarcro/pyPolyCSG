@@ -404,6 +404,88 @@ bool polyhedron::initialize_create_extrusion( const std::vector<double> &coords,
 	return initialize_load_from_mesh( tcoords, tfaces );
 }
 
+bool polyhedron::initialize_create_extrusion( const std::vector<double> &coords, const std::vector<int> &lines, const double distance, const int segments, const double dtheta )
+{
+	typedef std::pair<int,int> ii_pair;
+
+	std::vector<double> tcoords;
+	std::vector<int>    tfaces;
+
+	if( fabs(dtheta) > 45 ){
+	    // large angles will cause problems
+	}
+
+	int next_id = 0;
+
+    // convert rotation angle to radians
+	double raddtheta = dtheta * M_PI / 180.0;
+    double dZ = distance / segments;
+
+	// ****          Here we build up the coordinates         ***** //
+
+	// map of pairs of vertex ids making up the edges of the polyhedron
+	// there will be one edge for every segment and line, i.e. a total
+	// of segments * lines.size() edges
+	std::map< ii_pair, int > vid_map;
+	for( int segn=0; segn <= segments; segn++ )
+	{
+        // loop through each incremental rotation
+		double c = cos(segn*raddtheta);
+		double s = sin(segn*raddtheta);
+
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+            double x = coords[lines[linen]*2+0];
+            double y = coords[lines[linen]*2+1];
+
+		    // loop through each line rotating the coordinates
+            tcoords.push_back( x*c - y*s ); // x-coord rotated
+            tcoords.push_back( y*c + x*s ); // y-coord rotated
+            tcoords.push_back( segn * dZ ); // z-coord calculated
+            // add the edge to the edge list
+            vid_map[ ii_pair(segn,linen) ] = next_id++;
+ 		}
+	}
+
+    // ****            Here we generate the faces            ***** //
+	for( int segn=0; segn<segments; segn++ )
+	{
+	    // loop through each incremental rotation
+		for( int linen=0; linen<(int)lines.size(); linen++ )
+		{
+		    // get index of the first vertex of the line from this segment
+			int v0 = vid_map[ ii_pair((segn+0) % (segments+1), linen+0) ];
+			// get index of the first vertex of the line from the next segment
+			int v1 = vid_map[ ii_pair((segn+1) % (segments+1), linen+0) ];
+			// get index of the second vertex of the same line from this segment
+			int v2 = vid_map[ ii_pair((segn+0) % (segments+1), (linen+1) % lines.size()) ];
+			// get index of the second vertex of the line from the next segment
+			int v3 = vid_map[ ii_pair((segn+1) % (segments+1), (linen+1) % lines.size()) ];
+
+            // create the quad face
+            tfaces.push_back( 4 );
+            tfaces.push_back( v1 );
+            tfaces.push_back( v3 );
+            tfaces.push_back( v2 );
+            tfaces.push_back( v0 );
+		}
+	}
+
+	// add caps for the top and bottom
+    tfaces.push_back( lines.size() );
+    for( int linen=0; linen<(int)lines.size(); linen++ )
+    {
+        tfaces.push_back( vid_map[ ii_pair(0,linen) ] );
+    }
+    tfaces.push_back( lines.size() );
+    for( int linen=0; linen<(int)lines.size(); linen++ )
+    {
+        tfaces.push_back( vid_map[ ii_pair(segments,lines.size()-linen-1) ] );
+    }
+
+	return initialize_load_from_mesh( tcoords, tfaces );
+}
+
 bool polyhedron::initialize_create_surface_of_revolution( const std::vector<double> &coords, const std::vector<int> &lines, const double angle, const int segments ){
 	typedef std::pair<int,int> ii_pair;
 
