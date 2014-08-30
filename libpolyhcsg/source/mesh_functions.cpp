@@ -6,8 +6,11 @@
 namespace polyhcsg {
 
 /*
- This function tests if an input mesh is a closed manifold (approximately), by making sure that each edge has exactly two neighbors. This function depend on the input mesh being oriented correctly (i.e. that faces have consistent windings)
-*/
+ * This function tests if an input mesh is a closed manifold (approximately), 
+ * by making sure that each edge has exactly two neighbors. This function 
+ * depend on the input mesh being oriented correctly (i.e. that faces have 
+ * consistent windings)
+ */
 bool mesh_is_closed_manifold( const std::vector<double> &coords, const std::vector<int> &faces ){
 	typedef std::pair<int,int> ii_pair;
 	std::set<ii_pair> edges;
