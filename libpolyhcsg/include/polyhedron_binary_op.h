@@ -71,6 +71,8 @@ public:
 	polyhedron operator()( const polyhedron &A, const polyhedron &B );
 };
 
+bool poly_test ( polyhedron p);
+
 } // namespace polyhcsg
 
 #endif

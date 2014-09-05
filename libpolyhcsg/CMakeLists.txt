@@ -7,6 +7,7 @@ set( BOOLEAN_SOURCES
   source/mesh_functions.cpp
   source/mesh_io.cpp
   source/polyhedron_binary_op.cpp
+  source/PolyhedronUtils.cpp
   source/polyhedron_unary_op.cpp
   source/polyhedron.cpp
   source/triangulate.cpp
@@ -16,6 +17,7 @@ set( BOOLEAN_HEADERS
   include/mesh_functions.h
   include/mesh_io.h
   include/polyhedron_binary_op.h
+  include/PolyhedronUtils.h
   include/polyhedron_unary_op.h
   include/polyhedron.h
   include/triangulate.h
