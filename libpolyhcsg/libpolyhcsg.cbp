@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libpolyhcsg" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/libpolyhcsg" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CMakeLists.txt" />
+		<Unit filename="include/mesh_functions.h" />
+		<Unit filename="include/mesh_io.h" />
+		<Unit filename="include/polyhedron.h" />
+		<Unit filename="include/polyhedron_binary_op.h" />
+		<Unit filename="include/polyhedron_unary_op.h" />
+		<Unit filename="include/triangulate.h" />
+		<Unit filename="source/boolean_test.cpp" />
+		<Unit filename="source/mesh_converter.cpp" />
+		<Unit filename="source/mesh_functions.cpp" />
+		<Unit filename="source/mesh_io.cpp" />
+		<Unit filename="source/polyhedron.cpp" />
+		<Unit filename="source/polyhedron_binary_op.cpp" />
+		<Unit filename="source/polyhedron_unary_op.cpp" />
+		<Unit filename="source/triangulate.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

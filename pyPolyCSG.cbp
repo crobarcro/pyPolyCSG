@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="pyPolyCSG" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/pyPolyCSG" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="CMakeLists.txt" />
+		<Unit filename="include/pypolyhedron.h" />
+		<Unit filename="scripts/cnc_lego.py" />
+		<Unit filename="scripts/extrusion.py" />
+		<Unit filename="scripts/gpl-examples/QtOpenGLrender.py" />
+		<Unit filename="scripts/gpl-examples/QtOpenGLrender2.py" />
+		<Unit filename="scripts/gpl-examples/README" />
+		<Unit filename="scripts/mesh_access.py" />
+		<Unit filename="scripts/multmatrix_text.py" />
+		<Unit filename="scripts/python_example.py" />
+		<Unit filename="scripts/python_example2.py" />
+		<Unit filename="scripts/tests/box_cylinder_subtract.py" />
+		<Unit filename="scripts/tests/multmatrix_test.py" />
+		<Unit filename="scripts/tests/primitives/box.py" />
+		<Unit filename="scripts/tests/primitives/cone.py" />
+		<Unit filename="scripts/tests/primitives/cylinder.py" />
+		<Unit filename="scripts/tests/primitives/extrusion.py" />
+		<Unit filename="scripts/tests/primitives/sphere.py" />
+		<Unit filename="scripts/tests/primitives/surface_of_revolution.py" />
+		<Unit filename="scripts/tests/primitives/torus.py" />
+		<Unit filename="source/pypolyhedron.cpp" />
+		<Unit filename="source/python_wrapper.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

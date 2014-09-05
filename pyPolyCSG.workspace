@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="libpolyhcsg/libpolyhcsg.cbp" />
+		<Project filename="pyPolyCSG.cbp" />
+		<Project filename="libpolyhcsg/test/cornerrad/cornerrad.cbp" />
+		<Project filename="libpolyhcsg/test/p_extrude_rotate/p_extrude_rotate.cbp" />
+	</Workspace>
+</CodeBlocks_workspace_file>
